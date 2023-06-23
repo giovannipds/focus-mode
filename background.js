@@ -6,6 +6,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 const extensions = 'https://developer.chrome.com/docs/extensions'
 const webstore = 'https://developer.chrome.com/docs/webstore'
+const tableless = 'https://tableless.com.br/'
 
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.url.startsWith(extensions) || tab.url.startsWith(webstore)) {
@@ -33,5 +34,13 @@ chrome.action.onClicked.addListener(async (tab) => {
         target: { tabId: tab.id },
       });
     }
+  } else if (tab.url.startsWith(tableless)) {
+    const tabId = tab.id;
+    const prevState = await chrome.action.getBadgeText({ tabId });
+    const nextState = prevState === 'ON' ? 'OFF' : 'ON'
+    const { insertCSS, removeCSS } = chrome.scripting
+    const toggleCSS = nextState === "ON" ? insertCSS : removeCSS
+    await chrome.action.setBadgeText({ tabId, text: nextState });
+    await toggleCSS({ files: ["tableless-focus-mode.css"], target: { tabId } });
   }
 })
